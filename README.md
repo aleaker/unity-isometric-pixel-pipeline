@@ -3,7 +3,7 @@
 
 Built for isometric 3D games targeting a hand-crafted pixel art aesthetic, inspired by the work of [t3ssel8r](https://www.youtube.com/@t3ssel8r).
 
-![Uploading projeto gif.gif…]()
+![Uploading image.png…]()
 
 ---
 
