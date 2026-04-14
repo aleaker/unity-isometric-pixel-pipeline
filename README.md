@@ -16,6 +16,7 @@ https://github.com/user-attachments/assets/2ce64edf-1cb1-42fd-8b4b-039c94fd1b00
 - [Why Not PBR?](#why-not-pbr)
 - [Requirements](#requirements)
 - [Project Structure](#project-structure)
+- [Scene Hierarchy Reference](#scene-hierarchy-reference)
 - [Setup From Scratch](#setup-from-scratch)
 - [Inspector Parameters Reference](#inspector-parameters-reference)
 - [Known Limitations](#known-limitations)
@@ -166,7 +167,7 @@ Assets/
 ├── Materials/
 │   ├── Pipeline/
 │   │   ├── MAT_Outline.mat          ← Shader: Hidden/OutlineShader
-│   │   ├── MAT_Composite.mat        ← Shader: Hidden/CompositeShader (or your composite shader name)
+│   │   ├── MAT_Composite.mat        ← Shader: Hidden/CompositeShader
 │   │   └── MAT_SharpU.mat           ← Shader: Hidden/SharpUpscale
 │   ├── Toon/
 │   │   ├── MAT_ToonGreen.mat        ← Shader: Custom/ToonLit (example terrain material)
@@ -175,10 +176,10 @@ Assets/
 │   └── Grass/
 │       └── MAT_Grass.mat            ← Shader: Custom/GrassBlade
 ├── Rendering/
-│   ├── PC_Renderer.asset           ← URP Renderer Data with PixelRendererFeature added
+│   ├── PC_Renderer.asset            ← URP Renderer Data with PixelRendererFeature added
 │   └── RenderFeatures/
 │       ├── PixelRendererFeature.cs
-│       └── OutlineRendererFeature.cs  ← Standalone version (not used in 5-pass pipeline)
+│       └── OutlineRendererFeature.cs ← Standalone version (not used in 5-pass pipeline)
 ├── Scripts/
 │   └── Systems/
 │       ├── CloudShadowManager.cs
@@ -194,12 +195,46 @@ Assets/
 │       ├── CompositeShader.shader
 │       └── SharpUpscaleShader.shader
 ├── Textures/
-│   ├── CloudNoise_v5.png             ← Seamless noise for cloud shadows
-│   ├── WindNoise.png                 ← Seamless noise for grass wind
-│   └── GrassSprite.png              ← Alpha cutout grass blade sprite
+│   ├── CloudNoise_v5.png            ← Seamless noise for cloud shadows
+│   ├── WindNoise.png                ← Seamless noise for grass wind
+│   └── GrassSprite.png             ← Alpha cutout grass blade sprite
 └── Scenes/
-    └── DemoScene.unity               ← Ready-to-play demo scene
+    └── DemoScene.unity              ← Ready-to-play demo scene
 ```
+
+---
+
+## Scene Hierarchy Reference
+
+How the demo scene is organized. Use this as a guide when building your own scene:
+
+```
+Scene
+├── Directional Light             ← Main sun light
+├── Global Volume                 ← URP post-processing (SSAO disabled)
+├── EnvironmentManager            ← CloudShadowManager.cs
+├── GrassManager                  ← GrassSpawner.cs
+├── Plane                         ← Terrain with ToonLit material
+├── PlayerPlaceholder             ← Follow target for the camera
+├── Camera Pivot                  ← IsometricCameraController.cs
+│   └── Main Camera               ← Camera component (Orthographic, child of pivot)
+├── [scene objects]               ← Cubes, rocks, etc. with ToonLit materials
+└── Wall / Wall (1) / ...         ← Invisible walls (Box Collider only, Mesh Renderer disabled)
+```
+
+### Component Placement
+
+| Script | GameObject | Fields to Assign |
+|--------|-----------|------------------|
+| IsometricCameraController | Camera Pivot | Target → PlayerPlaceholder, Pixel Renderer Feature → PixelRendererFeature asset |
+| CloudShadowManager | EnvironmentManager | Light → Directional Light, Cloud Noise → CloudNoise_v5.png |
+| GrassSpawner | GrassManager | Grass Material → MAT_Grass, terrain reference, density settings |
+
+### Notes
+- The **Camera Pivot** is an empty GameObject. The actual Camera is a **child** of it — this separation is what allows pixel-perfect snapping without jitter.
+- **PlayerPlaceholder** can be any GameObject with a Transform. The camera will follow its position.
+- **Invisible walls** are regular cubes with Mesh Renderer disabled but Box Collider kept active. They prevent the player from falling off the map.
+- All scene objects use **Custom/ToonLit** materials. The terrain uses the patch system (`_Color2`, `_Color3`) for color variation.
 
 ---
 
@@ -322,7 +357,7 @@ This project was built by studying and adapting techniques from multiple sources
 
 If this project helped you, consider:
 - ⭐ Starring the repository
-- 🎮 Checking out the [itch.io demo]([https://bababuyyy.itch.io/](https://bababuyyyy.itch.io/unity-isometric-pixel-art-shader-demo)) (pay-what-you-want)
+- 🎮 Checking out the [itch.io demo](https://bababuyyyy.itch.io/unity-isometric-pixel-art-shader-demo) (pay-what-you-want)
 - ☕ [Buy me a coffee](https://www.buymeacoffee.com/bababuyyyy)
 
 ---
